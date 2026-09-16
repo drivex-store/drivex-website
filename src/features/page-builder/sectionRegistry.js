@@ -16,6 +16,7 @@ import MediaSection from "@views/general/animations/MediaSection";
 
 import PricingHeroSection from "@views/pricing/HeroSection";
 import PricingLogoSection from "@views/pricing/LogoSection";
+import PricingCardsSection from "@views/pricing/PricingCardsSection";
 
 import ContactHeroSection from "@views/contact/HeroSection";
 
@@ -36,4 +37,5 @@ export const sectionRegistry = {
   "pricing-hero": PricingHeroSection,
   pricingLogoSection: PricingLogoSection,
   "contact-hero": ContactHeroSection,
+  procingCardSection: PricingCardsSection,
 };

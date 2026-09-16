@@ -23,6 +23,7 @@ export const defaultPageOrder = {
   pricing: [
     { sectionType: "pricing-hero" },
     { sectionType: "pricingLogoSection" },
+    { sectionType: "pricingCardsSection" },
   ],
   contact: [
   { sectionType: "contact-hero" },

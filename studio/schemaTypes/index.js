@@ -39,6 +39,7 @@ import mediaSection from "./projects/mediaSection";
 import pricingPage from "./pages/PricingPage/pricingPage";
 import pricingHero from "./pages/PricingPage/sections/pricingHero";
 import logoSection from "./pages/PricingPage/sections/logoSection";
+import pricingCardsSection from "./pages/PricingPage/sections/pricingCardsSection";
 
 // --- Contact page ---
 import contactPage from "./pages/ContactPage/contactPage";
@@ -88,6 +89,7 @@ export const schemaTypes = [
   pricingPage,
   pricingHero,
   logoSection,
+  pricingCardsSection,
 
   // contact page
   contactPage,

@@ -9,7 +9,7 @@ export default defineConfig({
   name: 'default',
   title: 'DriveX Studio',
   
-  projectId: '0r77qhs0',
+  projectId: 'pc8d2ay0',
   dataset: 'production',
   
   plugins: [structureTool(), visionTool(), muxInput()],

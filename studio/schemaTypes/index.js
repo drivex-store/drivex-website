@@ -1,4 +1,3 @@
-
 import customImage from "./objects/image";
 import link from "./objects/link";
 import ctaButton from "./objects/ctaButton";
@@ -31,6 +30,7 @@ import aboutHero from "./pages/AboutPage/sections/aboutHero";
 import storySection from "./pages/AboutPage/sections/storySection";
 
 // --- Work page ---
+import workPage from "./pages/WorkPage/workPage";
 import workHero from "./pages/WorkPage/workHero";
 import workSliderSection from "./pages/WorkPage/workSliderSection";
 import mediaSection from "./projects/mediaSection";
@@ -81,6 +81,7 @@ export const schemaTypes = [
   storySection,
 
   // work page
+  workPage,
   workHero,
   workSliderSection,
   mediaSection,

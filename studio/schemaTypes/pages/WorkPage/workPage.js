@@ -1,6 +1,6 @@
 export default {
-  name: "pricingPage",
-  title: "Pricing Page",
+  name: "workPage",
+  title: "Work Page",
   type: "document",
   fields: [
     {
@@ -20,9 +20,9 @@ export default {
               type: "string",
               options: {
                 list: [
-                  { title: "Pricing hero", value: "pricing-hero" },
-                  { title: "Logo section", value: "pricingLogoSection" },
-                  { title: "Pricing cards", value: "pricingCardsSection" },
+                  { title: "Work hero", value: "work-hero" },
+                  { title: "Work slider", value: "workSliderSection" },
+                  { title: "Content block", value: "contentBlockSection" },
                 ],
               },
               validation: (Rule) => Rule.required(),
@@ -61,7 +61,7 @@ export default {
   ],
   preview: {
     prepare() {
-      return { title: "Pricing Page" };
+      return { title: "Work Page" };
     },
   },
 };

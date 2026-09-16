@@ -37,5 +37,5 @@ export const sectionRegistry = {
   "pricing-hero": PricingHeroSection,
   pricingLogoSection: PricingLogoSection,
   "contact-hero": ContactHeroSection,
-  procingCardSection: PricingCardsSection,
+  pricingCardsSection: PricingCardsSection,
 };

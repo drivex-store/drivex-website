@@ -39,22 +39,47 @@ function IconBase({ name, className, ...rest }) {
   return <IconComponent aria-hidden={true} className={cx("size-[1em] shrink-0", className)} {...rest} />;
 }
 
+const buttonVariants = cva(
+  [
+    "group inline-flex min-w-0 shrink-0 cursor-pointer items-center justify-center whitespace-nowrap",
+    "font-medium font-mono uppercase outline-none",
+    "focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+  ],
+  {
+    variants: {
+      size: {
+        sm: "text-body-sm",
+        default: "text-body",
+        lg: "text-body-lg"
+      }
+    },
+    defaultVariants: { size: "default" }
+  }
+);
+
 const leftIconVariants = cva(
   ["flex items-center justify-center", "transition-transform duration-700 [transition-timing-function:var(--ease-power4-in-out)]"],
   {
     variants: {
       size: { sm: "size-40", default: "size-48", lg: "size-56" },
       position: {
-        left: "origin-left -rotate-45 scale-0",
-        right: "absolute right-0 z-10 origin-right rotate-0 scale-100"
+        left: "origin-left",
+        right: "absolute right-0 z-10 origin-right"
       },
       theme: {
         light: "bg-foreground text-background",
         dark: "bg-foreground text-background",
         brand: "bg-brand text-black"
-      }
+      },
+      isActive: { true: "", false: "" }
     },
-    defaultVariants: { size: "default", theme: "light" }
+    compoundVariants: [
+      { position: "left", isActive: false, className: "-rotate-45 scale-0 group-hover:rotate-0 group-hover:scale-100" },
+      { position: "left", isActive: true, className: "rotate-0 scale-100" },
+      { position: "right", isActive: false, className: "rotate-0 scale-100 group-hover:-rotate-45 group-hover:scale-0" },
+      { position: "right", isActive: true, className: "-rotate-45 scale-0" }
+    ],
+    defaultVariants: { size: "default", theme: "light", isActive: false }
   }
 );
 
@@ -63,17 +88,23 @@ const wrapperVariants = cva(
   {
     variants: {
       size: {
-        sm: "h-40 -translate-x-[calc(40px+6px)] px-12",
-        default: "h-48 -translate-x-[calc(48px+6px)] px-16",
-        lg: "h-56 -translate-x-[calc(56px+6px)] px-24"
+        sm: "h-40 px-12",
+        default: "h-48 px-16",
+        lg: "h-56 px-24"
       },
       theme: {
         light: "bg-foreground text-background",
         dark: "bg-foreground text-background",
         brand: "bg-brand text-black"
-      }
+      },
+      isActive: { true: "translate-x-0", false: "group-hover:translate-x-0" }
     },
-    defaultVariants: { size: "default", theme: "light" }
+    compoundVariants: [
+      { size: "sm", isActive: false, className: "-translate-x-[calc(40px+6px)]" },
+      { size: "default", isActive: false, className: "-translate-x-[calc(48px+6px)]" },
+      { size: "lg", isActive: false, className: "-translate-x-[calc(56px+6px)]" }
+    ],
+    defaultVariants: { size: "default", theme: "light", isActive: false }
   }
 );
 
@@ -86,62 +117,36 @@ function ButtonIconWrapper({ className }) {
 }
 
 export function SanityLink(props) {
-  const { link, children, animated, size = "default", theme = "light", ...rest } = props;
+  const { link, children, animated, size = "default", theme = "light", className, ...rest } = props;
   const { isOpen, modalId, openModal } = useModal();
   
   const content = children ?? link.text;
   const isModalActive = isOpen && modalId === link.modalId;
 
-  if (link.type === "modal" && link.modalId) {
-    const handleOpenModal = () => openModal(link.modalId);
+  const renderContent = () => {
+    if (!animated) return content;
     
-    if (animated) {
-      const buttonClassName = cx(
-        "group inline-flex min-w-0 shrink-0 cursor-pointer items-center justify-center whitespace-nowrap",
-        "font-medium font-mono uppercase",
-        "outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        size === "sm" && "text-body-sm",
-        size === "default" && "text-body",
-        size === "lg" && "text-body-lg",
-        rest.className
-      );
-
-      const leftIconClass = cx(
-        leftIconVariants({ size, theme, position: "left" }),
-        "group-hover:rotate-0 group-hover:scale-100",
-        isModalActive && "rotate-0 scale-100"
-      );
-
-      const textWrapperClass = cx(
-        wrapperVariants({ size, theme }),
-        "group-hover:translate-x-0",
-        isModalActive && "translate-x-0"
-      );
-
-      const rightIconClass = cx(
-        leftIconVariants({ size, theme, position: "right" }),
-        "group-hover:-rotate-45 group-hover:scale-0",
-        isModalActive && "-rotate-45 scale-0"
-      );
-
-      return (
-        <button type="button" onClick={handleOpenModal} className={buttonClassName} {...rest}>
-          <span className="relative flex w-full items-center gap-6">
-            <span className={leftIconClass}>
-              <ButtonIconWrapper />
-            </span>
-            <span className={textWrapperClass}>{content}</span>
-            <span className={rightIconClass}>
-              <ButtonIconWrapper />
-            </span>
-          </span>
-        </button>
-      );
-    }
-
     return (
-      <button type="button" onClick={handleOpenModal} {...rest}>
-        {content}
+      <span className="relative flex w-full items-center gap-6">
+        <span className={leftIconVariants({ size, theme, position: "left", isActive: isModalActive })}>
+          <ButtonIconWrapper />
+        </span>
+        <span className={wrapperVariants({ size, theme, isActive: isModalActive })}>
+          {content}
+        </span>
+        <span className={leftIconVariants({ size, theme, position: "right", isActive: isModalActive })}>
+          <ButtonIconWrapper />
+        </span>
+      </span>
+    );
+  };
+
+  const combinedClassName = animated ? cx(buttonVariants({ size }), className) : className;
+
+  if (link.type === "modal" && link.modalId) {
+    return (
+      <button type="button" onClick={() => openModal(link.modalId)} className={combinedClassName} {...rest}>
+        {renderContent()}
       </button>
     );
   }
@@ -151,8 +156,8 @@ export function SanityLink(props) {
   const download = link.canDownload ? "" : undefined;
 
   return (
-    <Link href={link.href} target={target} rel={rel} download={download} {...rest}>
-      {content}
+    <Link href={link.href} target={target} rel={rel} download={download} className={combinedClassName} {...rest}>
+      {renderContent()}
     </Link>
   );
 }

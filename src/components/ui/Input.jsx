@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { cva, cx } from '@libs/vendor';
 
-export const inputVariants = cva({
+const inputVariants = cva({
   base: [
     "flex w-full border border-border bg-surface font-sans text-foreground",
     "file:border-0 file:bg-transparent file:font-medium",

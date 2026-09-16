@@ -1,20 +1,12 @@
-'use client';
+"use client";
 
-import { useRef, useState, useActionState, startTransition, useEffect } from 'react';
-import { createServerReference, callServer, findSourceMapURL } from 'react-server-dom-webpack/client';
-import { cx } from '@libs/vendor';
-import { useSpamPrevention } from '@features/newsletters/hooks/useSpamPrevention';
-import { FormHoneypot } from '@features/newsletters/forms/FormHoneypot';
+import { useRef, useState, useActionState, useEffect, startTransition } from 'react';
 import { AnimatedButton } from '@animations/components/AnimatedButton';
 import { Input } from '@components/ui/Input';
-
-const subscribeToNewsletterAction = createServerReference(
-  "60e79069d1ce8778aae0c5903d5d5a2a8a1a54a683",
-  callServer,
-  undefined,
-  findSourceMapURL,
-  "subscribeToNewsletter"
-);
+import { FormHoneypot } from '@features/newsletters/forms/FormHoneypot';
+import { useSpamPrevention } from '@features/newsletters/hooks/useSpamPrevention';
+import { cx } from '@libs/vendor';
+import { subscribeToNewsletter } from '@libs/actions/subscribeToNewsletter'; 
 
 export function NewsletterForm({
   heading,
@@ -25,108 +17,71 @@ export function NewsletterForm({
   className
 }) {
   const formRef = useRef(null);
-  const { checkSpam, enhanceFormData, reset } = useSpamPrevention({ formRef });
-
-  const [actionState, formAction, isPending] = useActionState(subscribeToNewsletterAction, {
-    success: false,
-    error: ""
-  });
   
+  const { checkSpam, enhanceFormData, reset } = useSpamPrevention({ formRef });
+  
+  const [state, action, isPending] = useActionState(subscribeToNewsletter, { success: false, error: "" });
   const [localError, setLocalError] = useState(null);
-
-  const handleSubmit = (e) => {
+  
+  const onSubmit = (e) => {
     e.preventDefault();
     setLocalError(null);
     
     const form = formRef.current;
     if (!form) return;
     
-    const spamResult = checkSpam(form);
-    if (spamResult.isSpam) {
-      setLocalError(spamResult.message);
+    const spamCheck = checkSpam(form);
+    if (spamCheck.isSpam) {
+      setLocalError(spamCheck.message);
       return;
     }
     
-    const enhancedData = enhanceFormData(new FormData(form));
+    const formData = enhanceFormData(new FormData(form));
     startTransition(() => {
-      formAction(enhancedData);
+      action(formData);
     });
   };
-
+  
   useEffect(() => {
-    if (actionState.success) {
+    if (state.success) {
       formRef.current?.reset();
       reset();
     }
-  }, [actionState.success, reset]);
-
-  if (actionState.success) {
+  }, [state.success, reset]);
+  
+  if (state.success) {
     return (
       <div className={className}>
-        {heading && (
-          <p className="mb-8 font-medium text-body text-foreground">
-            {heading}
-          </p>
-        )}
-        <p className="text-body text-foreground-muted">
-          {successMessage}
-        </p>
+        {heading && <p className="mb-8 font-medium text-body text-foreground">{heading}</p>}
+        <p className="text-body text-foreground-muted">{successMessage}</p>
       </div>
     );
   }
-
-  const submitText = isPending ? "..." : (buttonText === undefined ? "Subscribe" : buttonText);
-
+  
+  const displayError = localError || (!state.success && state.error) ? (localError || state.error) : null;
+  const displayButtonText = isPending ? "..." : (buttonText ?? "Subscribe");
+  
   return (
     <div className={className}>
-      {heading && (
-        <p className="mb-8 font-medium text-body text-foreground">
-          {heading}
-        </p>
-      )}
-      {description && (
-        <p className="mb-16 text-body-sm text-foreground-muted">
-          {description}
-        </p>
-      )}
-      <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6">
+      {heading && <p className="mb-8 font-medium text-body text-foreground">{heading}</p>}
+      {description && <p className="mb-16 text-body-sm text-foreground-muted">{description}</p>}
+      
+      <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6">
         <div className="flex flex-col gap-6">
-          <Input 
-            type="text" 
-            name="name" 
-            placeholder="Name" 
-            required={true} 
-            autoComplete="name" 
-            size="sm" 
-          />
-          <Input 
-            type="email" 
-            name="email" 
-            placeholder="Email" 
-            required={true} 
-            autoComplete="email" 
-            size="sm" 
-          />
-          <AnimatedButton 
-            type="submit" 
-            disabled={isPending} 
-            theme={buttonTheme} 
-            size="sm" 
-            className="w-full"
-          >
-            {submitText}
+          <Input type="text" name="name" placeholder="Name" required autoComplete="name" size="sm" />
+          <Input type="email" name="email" placeholder="Email" required autoComplete="email" size="sm" />
+          <AnimatedButton type="submit" disabled={isPending} theme={buttonTheme} size="sm" className="w-full">
+            {displayButtonText}
           </AnimatedButton>
         </div>
         
         <FormHoneypot />
         
-        <p className="text-body-sm text-foreground-muted opacity-60">
-          Unsubscribe anytime.
-        </p>
+        <p className="text-body-sm text-foreground-muted opacity-60">Unsubscribe anytime.</p>
         
-        {(localError || (!actionState.success && actionState.error)) && (
+        {displayError && (
           <p className={cx("text-body-sm", buttonTheme === "dark" ? "text-brand" : "text-red-500")}>
-            {localError || actionState.error}
+            {displayError}
           </p>
         )}
       </form>

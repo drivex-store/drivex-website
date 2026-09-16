@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Slot } from '@radix-ui/react-slot';
+import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cx } from '@libs/vendor';
 
 export const AnimatedLink = forwardRef(function AnimatedLink(props, ref) {
@@ -15,14 +15,27 @@ export const AnimatedLink = forwardRef(function AnimatedLink(props, ref) {
   const displayClass = indicator ? "inline-flex items-center" : "inline-block";
 
   const combinedClassName = cx(
-    "group relative w-fit cursor-pointer",
+    "group relative w-fit cursor-pointer outline-none",
+    "focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     displayClass,
-    "outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     className
   );
-  
-  const renderChildren = (childContent) => (
-    <>
+
+  const content = (indicator && !asChild) ? (
+    <span
+      className={cx(
+        "transition-transform duration-500 [transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
+        "group-hover:translate-x-24 group-focus-visible:translate-x-24"
+      )}
+    >
+      {children}
+    </span>
+  ) : (
+    children
+  );
+
+  return (
+    <Component ref={ref} className={combinedClassName} {...restProps}>
       {indicator && (
         <span
           className={cx(
@@ -36,55 +49,38 @@ export const AnimatedLink = forwardRef(function AnimatedLink(props, ref) {
         />
       )}
 
-      {indicator ? (
-        <span
-          className={cx(
-            "transition-transform duration-500 [transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
-            "group-hover:translate-x-24",
-            "group-focus-visible:translate-x-24"
-          )}
-        >
-          {childContent}
-        </span>
+      {asChild ? (
+        <Slottable>{children}</Slottable>
       ) : (
-        childContent
+        content
       )}
 
       <span
         className={cx(
           "pointer-events-none absolute inset-x-0 -bottom-1",
-          indicator && [
-            "transition-transform duration-500 [transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
-            "group-hover:translate-x-24 group-focus-visible:translate-x-24"
-          ]
+          indicator && "transition-transform duration-500 [transition-timing-function:cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-24 group-focus-visible:translate-x-24"
         )}
         aria-hidden="true"
       >
         <span
           className={cx(
             "absolute inset-x-0 top-0 h-px bg-current",
-            "origin-left scale-x-100",
+            "origin-left scale-x-100 delay-300",
             "transition-transform duration-700 [transition-timing-function:cubic-bezier(0.625,0.05,0,1)]",
-            "delay-300 group-hover:origin-right group-hover:scale-x-0 group-hover:delay-0",
+            "group-hover:origin-right group-hover:scale-x-0 group-hover:delay-0",
             "group-focus-visible:origin-right group-focus-visible:scale-x-0 group-focus-visible:delay-0"
           )}
         />
         <span
           className={cx(
             "absolute inset-x-0 top-0 h-px bg-current",
-            "origin-right scale-x-0",
+            "origin-right scale-x-0 delay-0",
             "transition-transform duration-700 [transition-timing-function:cubic-bezier(0.625,0.05,0,1)]",
-            "delay-0 group-hover:origin-left group-hover:scale-x-100 group-hover:delay-300",
+            "group-hover:origin-left group-hover:scale-x-100 group-hover:delay-300",
             "group-focus-visible:origin-left group-focus-visible:scale-x-100 group-focus-visible:delay-300"
           )}
         />
       </span>
-    </>
-  );
-
-  return (
-    <Component ref={ref} className={combinedClassName} {...restProps}>
-      {renderChildren(children)}
     </Component>
   );
 });

@@ -1,4 +1,5 @@
 const ALLOWED_HOSTNAME = "cdn.sanity.io";
+const ALLOWED_ORIGIN = `https://${ALLOWED_HOSTNAME}`;
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -15,13 +16,21 @@ export async function GET(request) {
     return new Response("Invalid url parameter", { status: 400 });
   }
 
-  if (parsed.hostname !== ALLOWED_HOSTNAME) {
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.hostname !== ALLOWED_HOSTNAME ||
+    parsed.username ||
+    parsed.password ||
+    parsed.port
+  ) {
     return new Response("Host not allowed", { status: 403 });
   }
 
+  const upstreamUrl = new URL(parsed.pathname + parsed.search, ALLOWED_ORIGIN);
+
   let upstream;
   try {
-    upstream = await fetch(parsed.toString(), {
+    upstream = await fetch(upstreamUrl.toString(), {
       headers: { Accept: "image/*" },
       next: { revalidate: 60 * 60 * 24 },
     });
